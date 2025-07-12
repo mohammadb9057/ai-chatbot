@@ -10,6 +10,18 @@ import {
   reasoningModel,
   titleModel,
 } from './models.test';
+
+import { LLM7 } from 'ai/providers/llm7';
+
+export const myProvider = {
+  languageModel: (modelId: string) =>
+    new LLM7({
+      apiKey: process.env.LLM7_API_KEY!,
+      baseURL: process.env.LLM7_API_BASE_URL || 'https://api.llm7.io/v1',
+      model: deepseek-r1-0528,
+    }),
+};
+
 import { isTestEnvironment } from '../constants';
 
 export const myProvider = isTestEnvironment
