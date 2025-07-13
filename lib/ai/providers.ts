@@ -3,19 +3,23 @@ import {
   extractReasoningMiddleware,
   wrapLanguageModel,
 } from 'ai';
-import { xai } from '@ai-sdk/xai';
-import { OpenAI } from '@ai-sdk/openai';
+import { createOpenAI } from '@ai-sdk/openai';
 import {
   artifactModel,
   chatModel,
   reasoningModel,
   titleModel,
 } from './models.test';
-
 import { isTestEnvironment } from '../constants';
 
-const llm7ApiKey = process.env.LLM7_API_KEY!;
-const llm7BaseURL = process.env.LLM7_API_BASE_URL || 'https://api.llm7.io/v1';
+
+const openai = createOpenAI({
+  // custom settings, e.g.
+  compatibility: 'compatible', // strict mode, enable when using the OpenAI API
+  baseURL:'https://api.openai.com/v1' ,
+  Authorization:'OPENAI_API_KEY',
+  
+});
 
 export const myProvider = isTestEnvironment
   ? customProvider({
@@ -28,31 +32,15 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        'chat-model': new OpenAI({
-          apiKey: llm7ApiKey,
-          baseURL: llm7BaseURL,
-          model: 'deepseek-r1-0528',
-        }),
+        'chat-model': xai('grok-2-vision-1212'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: new OpenAI({
-            apiKey: llm7ApiKey,
-            baseURL: llm7BaseURL,
-            model: 'deepseek-coder',
-          }),
+          model: xai('grok-3-mini-beta'),
           middleware: extractReasoningMiddleware({ tagName: 'think' }),
         }),
-        'title-model': new OpenAI({
-          apiKey: llm7ApiKey,
-          baseURL: llm7BaseURL,
-          model: 'deepseek-r1-0528',
-        }),
-        'artifact-model': new OpenAI({
-          apiKey: llm7ApiKey,
-          baseURL: llm7BaseURL,
-          model: 'deepseek-r1-0528',
-        }),
+        'title-model': xai('grok-2-1212'),
+        'artifact-model': xai('grok-2-1212'),
       },
       imageModels: {
-        // اگر llm7 تصویر ساپورت کند، اینجا اضافه کن
+        'small-model': xai.imageModel('grok-2-image'),
       },
     });
